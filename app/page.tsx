@@ -39,13 +39,13 @@ export default function Home() {
           >
             {t.startChat}
           </Link>
-          <button
+          {/* <button
             onClick={handleCreateInviteLink}
             className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-full transition-colors"
           >
             <IoCopy size={20} />
             {t.createInviteLink}
-          </button>
+          </button> */}
         </div>
       </div>
     </main>

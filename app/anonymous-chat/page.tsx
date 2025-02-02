@@ -12,6 +12,8 @@ import { IoMenu, IoCopy, IoClose, IoLink } from "react-icons/io5";
 import { translations, Language } from "../../lib/translations";
 import LanguageToggle from "../../components/LanguageToggle";
 import { useRouter, useSearchParams } from "next/navigation";
+import type { Metadata } from "next";
+import defaultMetadata from "../../lib/metadata";
 
 function AnonymousChatContent() {
   const [userUUID, setUserUUID] = useState<string | null>(null);

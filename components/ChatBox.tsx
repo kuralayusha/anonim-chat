@@ -15,10 +15,24 @@ export default function ChatBox({
   const [messages, setMessages] = useState<any[]>([]);
   const [newMessage, setNewMessage] = useState<string>("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
+  const [isFirstLoad, setIsFirstLoad] = useState(true);
 
   // Otomatik scroll fonksiyonu
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  const scrollToBottom = (force = false) => {
+    if (messagesContainerRef.current && (isFirstLoad || force)) {
+      const container = messagesContainerRef.current;
+      const isNearBottom =
+        container.scrollHeight - container.scrollTop - container.clientHeight <
+        100;
+
+      if (isFirstLoad || isNearBottom || force) {
+        messagesEndRef.current?.scrollIntoView({
+          behavior: isFirstLoad ? "auto" : "smooth",
+        });
+        if (isFirstLoad) setIsFirstLoad(false);
+      }
+    }
   };
 
   // Mesajları yükle
@@ -34,9 +48,12 @@ export default function ChatBox({
         console.error("Error fetching messages:", error);
       } else {
         setMessages(data);
+        // İlk yüklemede scroll'u en alta getir
+        setTimeout(() => scrollToBottom(true), 100);
       }
     };
 
+    setIsFirstLoad(true);
     fetchMessages();
   }, [connectionId]);
 
@@ -54,6 +71,8 @@ export default function ChatBox({
         },
         (payload: any) => {
           setMessages((prev) => [...prev, payload.new]);
+          // Yeni mesaj geldiğinde scroll'u kontrol et
+          setTimeout(() => scrollToBottom(), 100);
         }
       )
       .subscribe();
@@ -62,11 +81,6 @@ export default function ChatBox({
       subscription.unsubscribe();
     };
   }, [connectionId]);
-
-  // Yeni mesaj geldiğinde veya mesajlar yüklendiğinde scroll
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
 
   // Yeni mesaj gönder
   const handleSendMessage = async (e?: React.FormEvent) => {
@@ -86,21 +100,19 @@ export default function ChatBox({
       toast.error("Error sending message");
     } else {
       setNewMessage("");
-    }
-  };
-
-  // Enter tuşu ile gönderme
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      handleSendMessage();
+      // Mesaj gönderildikten sonra scroll'u en alta getir
+      setTimeout(() => scrollToBottom(true), 100);
     }
   };
 
   return (
     <div className="flex flex-col h-full bg-[#1E293B] shadow-xl">
       {/* Mesaj listesi */}
-      <div className="flex-1 overflow-y-auto p-4 pt-16 space-y-4 custom-scrollbar">
+      <div
+        ref={messagesContainerRef}
+        className="flex-1 overflow-y-auto p-4 pt-16 space-y-4 custom-scrollbar"
+        style={{ height: "calc(100vh - 80px)" }} // Form yüksekliğini çıkar
+      >
         {messages.map((msg) => (
           <div
             key={msg.id}
@@ -138,7 +150,9 @@ export default function ChatBox({
             type="text"
             value={newMessage}
             onChange={(e) => setNewMessage(e.target.value)}
-            onKeyPress={handleKeyPress}
+            onKeyPress={(e) =>
+              e.key === "Enter" && !e.shiftKey && handleSendMessage()
+            }
             placeholder="Mesajınızı yazın..."
             className="flex-1 p-3 rounded-full bg-[#475569] text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
