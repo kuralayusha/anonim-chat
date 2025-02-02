@@ -8,9 +8,10 @@ import ChatBox from "../../components/ChatBox";
 import ConnectionList from "../../components/ConnectionList";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { IoMenu, IoCopy, IoClose } from "react-icons/io5";
+import { IoMenu, IoCopy, IoClose, IoLink } from "react-icons/io5";
 import { translations, Language } from "../../lib/translations";
 import LanguageToggle from "../../components/LanguageToggle";
+import { useRouter, useSearchParams } from "next/navigation";
 
 export default function ConnectPage() {
   const [userUUID, setUserUUID] = useState<string | null>(null);
@@ -24,6 +25,8 @@ export default function ConnectPage() {
   const [incomingRequests, setIncomingRequests] = useState<any[]>([]);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [lang, setLang] = useState<Language>("tr");
+  const router = useRouter();
+  const searchParams = useSearchParams();
 
   const t = translations[lang];
 
@@ -34,6 +37,26 @@ export default function ConnectPage() {
   useEffect(() => {
     const newUUID = uuidv4();
     setUserUUID(newUUID);
+    sessionStorage.setItem("userUUID", newUUID);
+
+    // URL'den chat parametresini kontrol et
+    const connectToUUID = searchParams.get("chat");
+    if (connectToUUID) {
+      setTargetUUID(connectToUUID);
+      // Mobil görünümde sidebar'ı aç
+      if (window.innerWidth < 1024) {
+        setIsSidebarOpen(true);
+      }
+      // Kısa bir gecikme ile otomatik bağlantı isteği gönder
+      setTimeout(() => {
+        const connectButton = document.querySelector("[data-connect-button]");
+        if (connectButton instanceof HTMLButtonElement) {
+          connectButton.click();
+        }
+        // URL'den parametreyi kaldır
+        router.replace("/anonymous-chat", { scroll: false });
+      }, 1000);
+    }
 
     supabase
       .from("anonim_chat_users")
@@ -43,26 +66,27 @@ export default function ConnectPage() {
       });
   }, []);
 
-  // Bağlantı isteği gönder
-  const handleConnect = async () => {
-    if (!userUUID || !targetUUID) return;
+  // Bağlantı isteği gönderme fonksiyonunu güncelle
+  const handleConnect = async (targetId?: string) => {
+    const finalTargetUUID = targetId || targetUUID;
+    if (!userUUID || !finalTargetUUID) return;
 
     const { data, error } = await supabase
       .from("anonim_chat_connections")
       .insert([
         {
           requester_uuid: userUUID,
-          target_uuid: targetUUID,
+          target_uuid: finalTargetUUID,
           status: "pending",
         },
       ]);
 
     if (error) {
-      toast.error("Error sending connection request");
+      toast.error(t.errorSendingRequest);
       console.error(error);
     } else {
       setConnectionStatus("waiting");
-      toast.info("Waiting for connection...");
+      toast.info(t.waitingConnection);
     }
   };
 
@@ -106,15 +130,18 @@ export default function ConnectPage() {
           if (payload.new.status === "accepted") {
             setConnectionStatus("connected");
             setActiveConnectionId(payload.new.id);
-            toast.success("Bağlantı kuruldu!");
+            toast.success(t.connectionEstablished);
+
+            // Mobil görünümde sidebar'ı kapat
+            if (window.innerWidth < 1024) {
+              setIsSidebarOpen(false);
+            }
 
             const newConnection = {
               ...payload.new,
               status: "accepted",
             };
             setIncomingRequests((prev) => [...prev, newConnection]);
-
-            // input'u temizle
             setTargetUUID("");
           }
         }
@@ -134,36 +161,27 @@ export default function ConnectPage() {
       .eq("id", connectionId);
 
     if (error) {
-      toast.error("Error accepting request");
+      toast.error(t.errorAcceptingRequest);
     } else {
-      // Kabul edilen bağlantıyı bul
       const acceptedConnection = incomingRequests.find(
         (req) => req.id === connectionId
       );
 
       if (acceptedConnection) {
-        // İsteği gönderen tarafta bağlantı durumunu güncelle
         setIncomingRequests((prev) =>
           prev.map((req) =>
             req.id === connectionId ? { ...req, status: "accepted" } : req
           )
         );
 
-        // İsteği kabul eden tarafta yeni bir bağlantı kartı oluştur
-        // const newConnection = {
-        //   ...acceptedConnection,
-        //   id: connectionId, // Aynı bağlantı ID'si
-        //   requester_uuid: acceptedConnection.target_uuid, // Rolleri değiştir
-        //   target_uuid: acceptedConnection.requester_uuid,
-        //   status: "accepted",
-        // };
-
-        // // Yeni bağlantıyı ekle (sadece kabul eden tarafta)
-        // setIncomingRequests((prev) => [...prev, newConnection]);
-
         setConnectionStatus("connected");
         setActiveConnectionId(connectionId);
-        toast.success("Bağlantı kuruldu!");
+        toast.success(t.connectionEstablished);
+
+        // Mobil görünümde sidebar'ı kapat
+        if (window.innerWidth < 1024) {
+          setIsSidebarOpen(false);
+        }
       }
     }
   };
@@ -333,14 +351,27 @@ export default function ConnectPage() {
                   readOnly
                   className="flex-1 px-3 py-1.5 bg-[#334155]/50 rounded text-sm text-gray-100 focus:outline-none border border-[#475569]/20"
                 />
+
                 <button
                   onClick={() => {
                     navigator.clipboard.writeText(userUUID || "");
-                    toast.success("UUID kopyalandı!");
+                    toast.success(t.uuidCopied);
                   }}
                   className="p-1.5 bg-[#334155]/50 hover:bg-[#475569]/50 text-[#94A3B8] rounded transition-colors border border-[#475569]/20"
                 >
                   <IoCopy size={16} />
+                </button>
+
+                <button
+                  onClick={() => {
+                    const inviteLink = `${window.location.origin}/anonymous-chat?chat=${userUUID}`;
+                    navigator.clipboard.writeText(inviteLink);
+                    toast.success(t.inviteLinkCopied);
+                  }}
+                  className="p-1.5 bg-[#334155]/50 hover:bg-[#475569]/50 text-[#94A3B8] rounded transition-colors border border-[#475569]/20"
+                  title={t.createInviteLink}
+                >
+                  <IoLink size={16} />
                 </button>
               </div>
             </div>
@@ -356,7 +387,8 @@ export default function ConnectPage() {
                   className="flex-1 px-3 py-1.5 bg-[#334155]/50 rounded text-sm text-gray-100 placeholder-[#64748B] focus:outline-none focus:ring-1 focus:ring-[#3B82F6] border border-[#475569]/20"
                 />
                 <button
-                  onClick={handleConnect}
+                  data-connect-button
+                  onClick={() => handleConnect(targetUUID)}
                   className={`p-1.5 rounded transition-colors border border-[#475569]/20 ${
                     connectionStatus === "waiting"
                       ? "bg-[#CA8A04]/30 text-[#FDE047] border-[#CA8A04]/30"

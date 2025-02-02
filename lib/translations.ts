@@ -22,6 +22,13 @@ export const translations = {
     errorDeletingConnection: "Bağlantı silinirken hata oluştu",
     connectionDeleted: "Bağlantı ve sohbet geçmişi silindi",
     language: "Dil",
+    title: "Gizlice Sohbet Edelim",
+    description:
+      "Güvenli ve anonim sohbet için hoş geldiniz. Mesajlarınız oturum sonunda silinir.",
+    startChat: "Sohbete Başla",
+    createInviteLink: "Davet Linki Oluştur",
+    inviteLinkCopied: "Davet linki kopyalandı!",
+    errorSendingRequest: "Bağlantı isteği gönderilirken hata oluştu",
   },
   en: {
     uuid: "Your ID",
@@ -46,7 +53,14 @@ export const translations = {
     errorDeletingConnection: "Error deleting connection",
     connectionDeleted: "Connection and chat history deleted",
     language: "Language",
+    title: "Let's Chat Secretly",
+    description:
+      "Welcome to secure and anonymous chat. Your messages will be deleted at the end of the session.",
+    startChat: "Start Chatting",
+    createInviteLink: "Create Invite Link",
+    inviteLinkCopied: "Invite link copied!",
+    errorSendingRequest: "Error sending connection request",
   },
-};
+} as const;
 
 export type Language = keyof typeof translations;

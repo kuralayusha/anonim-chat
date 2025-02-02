@@ -47,7 +47,7 @@ export default function ConnectionList({
               </p>
               {unreadMessages[request.id] > 0 && (
                 <span className="text-xs text-[#3B82F6]">
-                  {unreadMessages[request.id]} okunmamış mesaj
+                  {unreadMessages[request.id]} {t.unreadMessages}
                 </span>
               )}
             </div>
