@@ -1,6 +1,6 @@
 "use client"; // Client Component olarak işaretle
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { v4 as uuidv4 } from "uuid";
 import { supabase } from "../../lib/supabaseClient";
 import ConnectionStatus from "../../components/ConnectionStatus";
@@ -13,7 +13,7 @@ import { translations, Language } from "../../lib/translations";
 import LanguageToggle from "../../components/LanguageToggle";
 import { useRouter, useSearchParams } from "next/navigation";
 
-export default function ConnectPage() {
+function AnonymousChatContent() {
   const [userUUID, setUserUUID] = useState<string | null>(null);
   const [targetUUID, setTargetUUID] = useState<string>("");
   const [connectionStatus, setConnectionStatus] = useState<
@@ -453,5 +453,13 @@ export default function ConnectPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function ConnectPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <AnonymousChatContent />
+    </Suspense>
   );
 }
