@@ -8,7 +8,7 @@ import ChatBox from "../../components/ChatBox";
 import ConnectionList from "../../components/ConnectionList";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { IoMenu, IoCopy, IoClose } from "react-icons/io5"; // react-icons ekleyin
+import { IoMenu, IoCopy, IoClose } from "react-icons/io5";
 import { translations, Language } from "../../lib/translations";
 import LanguageToggle from "../../components/LanguageToggle";
 
@@ -31,19 +31,17 @@ export default function ConnectPage() {
     setLang((prev) => (prev === "tr" ? "en" : "tr"));
   };
 
-  // UUID'yi her sayfa yüklendiğinde yeniden oluştur
   useEffect(() => {
     const newUUID = uuidv4();
     setUserUUID(newUUID);
 
-    // Yeni UUID'yi veritabanına kaydet
     supabase
       .from("anonim_chat_users")
       .insert([{ user_uuid: newUUID }])
       .then(({ error }) => {
         if (error) console.error("Error saving UUID:", error);
       });
-  }, []); // Sadece component mount olduğunda çalışsın
+  }, []);
 
   // Bağlantı isteği gönder
   const handleConnect = async () => {
