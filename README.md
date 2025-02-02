@@ -48,8 +48,8 @@ yarn install
 3. Create `.env.local` file:
 
 ```env
-NEXT_PUBLIC_SUPABASE_URL=your_SUPABASE_URL
-NEXT_PUBLIC_SUPABASE_ANON_KEYyour_NEXT_PUBLIC_SUPABASE_ANON_KEY
+SUPABASE_URL=your_SUPABASE_URL
+SUPABASE_ANON_KEYyour_SUPABASE_ANON_KEY
 ```
 
 4. Set up Supabase database tables:
