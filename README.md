@@ -1,6 +1,6 @@
 # Very Very Anonymous Chat
 
-A secure and anonymous chat application that enables users to communicate through unique IDs, built with Next.js and Supabase.
+A secure and anonymous chat application that enables users to communicate through unique IDs, built with Next.js and Supabase..
 
 ## 🌟 Features
 
