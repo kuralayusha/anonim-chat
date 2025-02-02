@@ -14,7 +14,7 @@ A secure and anonymous chat application that enables users to communicate throug
 
 ## 🚀 Tech Stack
 
-- **Frontend**: Next.js 13, React, TypeScript
+- **Frontend**: Next.js, TypeScript
 - **Styling**: Tailwind CSS
 - **Real-time**: Supabase Realtime
 - **State Management**: React Hooks
