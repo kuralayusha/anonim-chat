@@ -150,14 +150,18 @@ export default function ChatBox({
             type="text"
             value={newMessage}
             onChange={(e) => setNewMessage(e.target.value)}
-            onKeyPress={(e) =>
-              e.key === "Enter" && !e.shiftKey && handleSendMessage()
-            }
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault(); // Form submit'i engelle
+                handleSendMessage();
+              }
+            }}
             placeholder="Mesajınızı yazın..."
             className="flex-1 p-3 rounded-full bg-[#475569] text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
           <button
-            type="submit"
+            type="button" // Form submit'i engelle
+            onClick={handleSendMessage}
             className="p-3 rounded-full bg-blue-600 text-white hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <IoSend className="w-5 h-5" />
