@@ -32,7 +32,7 @@ export default function LandingPage() {
           sonunda silinir.
         </p>
         <Link
-          href={`/anonim-chat`}
+          href={`/anonymous-chat`}
           className="bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-8 rounded-full transition-colors"
         >
           Sohbete Başla
